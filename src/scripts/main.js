@@ -5,7 +5,7 @@ const successEl = (message) =>
 const errorEl = (message) =>
   `<div data-qa="notification" class="error">${message}</div>`;
 
-const promiseHandler = (message) => {
+const displayMessage = (message) => {
   const body = document.querySelector('body');
 
   body.insertAdjacentHTML('beforeend', message);
@@ -16,20 +16,26 @@ const promise1 = new Promise((resolve, reject) => {
     reject(errorEl('First promise was rejected'));
   }, 3000);
 
-  document.addEventListener('click', () => {
+  const handleClick = () => {
     clearTimeout(timeoutId);
     resolve(successEl('First promise was resolved'));
-  });
+    document.removeEventListener('click', handleClick);
+  };
+
+  document.addEventListener('click', handleClick);
 });
 
 const promise2 = new Promise((resolve) => {
-  document.addEventListener('click', () => {
-    resolve(successEl('Second promise was resolved'));
-  });
+  const handleClick = (e) => {
+    if (e.button === 0 || e.button === 2) {
+      resolve(successEl('Second promise was resolved'));
+      document.removeEventListener('click', handleClick);
+      document.removeEventListener('contextmenu', handleClick);
+    }
+  };
 
-  document.addEventListener('contextmenu', () => {
-    resolve(successEl('Second promise was resolved'));
-  });
+  document.addEventListener('click', handleClick);
+  document.addEventListener('contextmenu', handleClick);
 });
 
 let leftClick = false;
@@ -54,10 +60,6 @@ const promise3 = new Promise((resolve) => {
   document.addEventListener('contextmenu', handleClick);
 });
 
-document.addEventListener('contextmenu', (e) => {
-  e.preventDefault();
-});
-
-promise1.then(promiseHandler).catch(promiseHandler);
-promise2.then(promiseHandler);
-promise3.then(promiseHandler);
+promise1.then(displayMessage).catch(displayMessage);
+promise2.then(displayMessage);
+promise3.then(displayMessage);
