@@ -11,19 +11,21 @@ const displayMessage = (message) => {
   body.insertAdjacentHTML('beforeend', message);
 };
 
-const promise1 = new Promise((resolve, reject) => {
-  const timeoutId = setTimeout(() => {
-    reject(errorEl('First promise was rejected'));
-  }, 3000);
+const promise1 = Promise.race([
+  new Promise((resolve) => {
+    const handleClick = () => {
+      resolve(successEl('First promise was resolved'));
+      document.removeEventListener('click', handleClick);
+    };
 
-  const handleClick = () => {
-    clearTimeout(timeoutId);
-    resolve(successEl('First promise was resolved'));
-    document.removeEventListener('click', handleClick);
-  };
-
-  document.addEventListener('click', handleClick);
-});
+    document.addEventListener('click', handleClick);
+  }),
+  new Promise((resolve, reject) => {
+    setTimeout(() => {
+      reject(errorEl('First promise was rejected'));
+    }, 3000);
+  }),
+]);
 
 const promise2 = new Promise((resolve) => {
   const handleClick = (e) => {
